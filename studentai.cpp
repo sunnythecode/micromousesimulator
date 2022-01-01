@@ -1,7 +1,11 @@
 
 #include "micromouseserver.h"
 #include <iostream>
+#include <vector>
+#include <algorithm>
 using namespace std;
+
+vector <char>moves;
 void microMouseServer::studentAI()
 {
 /*
@@ -22,10 +26,53 @@ void microMouseServer::studentAI()
  * void foundFinish();
  * void printUI(const char *mesg);
 */
+    if ((isWallRight() == true) and (isWallLeft() == true) and (isWallForward() == false)) {
+        moves.push_back('F');
+        moveForward();
+
+    }
+    if ((isWallRight() == false) and (isWallLeft() == true) and (isWallForward() == true)) {
+        turnRight();
+        moves.push_back('R');
+    }
+    if ((isWallRight() == true) and (isWallLeft() == false) and (isWallForward() == true)) {
+        turnLeft();
+        moves.push_back('L');
+    }
+    if ((isWallRight() == true) and (isWallLeft() == true) and (isWallForward() == true)) {
+        turnRight();
+        turnRight();
+        for (const char i : moves) {
+            qDebug(&i);
+            printUI(&i);
+
+          }
+       printUI("Reverse:");
+        reverse(moves.begin(), moves.end());
+        for (const char i : moves) {
+            qDebug(&i);
+            printUI(&i);
+            if(i == 'F') {
+                moveForward(); }
+            if(i == 'R') {
+                turnLeft(); }
+            if(i== 'L') {
+                turnRight();
+            }
+
+
+          }
+        turnRight();
+        turnRight();
+
+    }
+    else {
+        moveForward();
+        moves.push_back('F');
+    }
 
 }
 
-bool moveForward();
 
 
 
