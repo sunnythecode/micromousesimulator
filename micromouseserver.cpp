@@ -481,8 +481,6 @@ void microMouseServer::turnLeft()
     }
 
 }
-
-
 void microMouseServer::turnRight()
 {
     QPoint newPos;
@@ -501,98 +499,6 @@ void microMouseServer::turnRight()
     case dRIGHT:
         this->maze->drawMouse(newPos, dDOWN);
         break;
-    }
-}
-
-void microMouseServer::turnBackward()
-{
-    this->turnRight();
-    this->turnRight();
-    this->moveForward();
-}
-bool microMouseServer::isDestination()
-{
-    if (!isWallForward() && !isWallLeft() && !isWallRight()) {
-        return false;
-    }
-    else if(!isWallForward() && !isWallRight()) {
-        if (moveForward()) {
-            if(!isWallRight() && isWallForward() && isWallLeft()) {
-                turnRight();
-                if(moveForward()) {
-                    if (isWallForward() && isWallLeft() && !isWallRight()) {
-                        return true;
-                    }
-                    else {
-                        turnBackward();
-                        turnRight();
-                        turnRight();
-                        turnLeft();
-                        turnBackward();
-                        turnRight();
-                        turnRight();
-                        return false;
-
-                    }
-                }
-                else {
-                    turnLeft();
-                    turnBackward();
-                    turnRight();
-                    turnRight();
-                    return false;
-                }
-            }
-            else {
-                turnBackward();
-                turnRight();
-                turnRight();
-            }
-        }
-        else {
-            return false;
-        }
-
-    }
-    else if(!isWallForward() && !isWallLeft()) {
-        if (moveForward()) {
-            if(!isWallLeft() && isWallForward() && isWallRight()) {
-                turnLeft();
-                if(moveForward()) {
-                    if (isWallForward() && isWallRight() && !isWallLeft()) {
-                        return true;
-                    }
-                    else {
-                        turnBackward();
-                        turnLeft();
-                        turnBackward();
-                        turnRight();
-                        turnRight();
-                        return false;
-
-                    }
-                }
-                else {
-                    turnRight();
-                    turnBackward();
-                    turnRight();
-                    turnRight();
-                    return false;
-                }
-            }
-            else {
-                turnBackward();
-                turnRight();
-                turnRight();
-            }
-        }
-        else {
-            return false;
-        }
-
-    }
-    else {
-        return false;
     }
 }
 
