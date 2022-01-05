@@ -51,6 +51,8 @@ private:
     bool moveForward();
     void turnLeft();
     void turnRight();
+    void turnBackward();
+    bool isDestination();
     void foundFinish();
     void printUI(const char *mesg);
 
