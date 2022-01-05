@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <cmath>
 using namespace std;
 
 
@@ -22,6 +23,9 @@ vector<vector<int>> pnode
 {
     {0,0,0}
 };
+vector<int> temp_loc;
+int pre_turn = 0; // whether previous move was a turn(for pnode marking)
+
 // Useful Functions:------------------------------------------------------------------------------------------------------------------------------
 
 void forward_update() {
@@ -50,7 +54,85 @@ void print_vector(vector <vector<int> > vctr) {
                 cout << vctr[i][j] << ",";
             }
             cout << endl;
-        }
+        }}
+bool isForwardVisited() { 
+    if  ( abs(position[2] % 4) == 0) { // forward
+        temp_loc.push_back(position[0]);
+        temp_loc.push_back(position[1]+1);
+
+    } else if  ( abs(position[2] % 4) == 1) { // right
+        temp_loc.push_back(position[0]+1);
+        temp_loc.push_back(position[1]);
+
+    } else if  ( abs(position[2] % 4) == 2) { // back
+        temp_loc.push_back(position[0]);
+        temp_loc.push_back(position[1]-1);
+
+    } else if  ( abs(position[2] % 4) == 3) { // left
+        temp_loc.push_back(position[0]-1);
+        temp_loc.push_back(position[1]);
+
+    }
+    cout << "[ "<< temp_loc[0] << ", "<< temp_loc[1] << "]";
+    if ((count(visited.begin(), visited.end(), temp_loc))) {
+        return true;
+    }
+    else {
+        return false;
+    }
+    temp_loc.erase(temp_loc.begin(),temp_loc.end());
+}
+bool isRightVisited() {
+    if  ( abs(position[2] % 4) == 0) { // forward
+        temp_loc.push_back(position[0]+1);
+        temp_loc.push_back(position[1]);
+
+    } else if  ( abs(position[2] % 4) == 1) { // right
+        temp_loc.push_back(position[0]);
+        temp_loc.push_back(position[1]-1);
+
+    } else if  ( abs(position[2] % 4) == 2) { // back
+        temp_loc.push_back(position[0]-1);
+        temp_loc.push_back(position[1]);
+
+    } else if  ( abs(position[2] % 4) == 3) { // left
+        temp_loc.push_back(position[0]);
+        temp_loc.push_back(position[1]+1);
+
+    }
+    if ((count(visited.begin(), visited.end(), temp_loc))) {
+        return true;
+    }
+    else {
+        return false;
+    }
+    temp_loc.erase (temp_loc.begin(),temp_loc.end());
+}
+bool isLeftVisited() {
+    if  ( abs(position[2] % 4) == 0) { // forward
+        temp_loc.push_back(position[0]-1);
+        temp_loc.push_back(position[1]);
+
+    } else if  ( abs(position[2] % 4) == 1) { // right
+        temp_loc.push_back(position[0]);
+        temp_loc.push_back(position[1]+1);
+
+    } else if  ( abs(position[2] % 4) == 2) { // back
+        temp_loc.push_back(position[0]+1);
+        temp_loc.push_back(position[1]);
+
+    } else if  ( abs(position[2] % 4) == 3) { // left
+        temp_loc.push_back(position[0]);
+        temp_loc.push_back(position[1]-1);
+
+    }
+    if ((count(visited.begin(), visited.end(), temp_loc))) {
+        return true;
+    }
+    else {
+        return false;
+    }
+    temp_loc.erase (temp_loc.begin(),temp_loc.end());
 }
 
 // Functions defined in micromouseserver.cpp by me are:
@@ -94,15 +176,52 @@ void microMouseServer::studentAI()
     }
 
 
+    //BackTracing:
+    if (back_status == 1) {
+        cout<< ">Back";
+        int n = pnode.size();
+        vector<int> last_pnode = pnode[n-1];
+        vector<int> last_pnode_loc = {last_pnode[0], last_pnode[1]};
+        if (location == last_pnode_loc) {
+            cout<<" ,last Pnode found";
+            int x = abs(((last_pnode[2] % 4) - (position[2] % 4 )) % 4);
+            cout << x;
+            for (int i = 0; i < x; i++) {
+              turnRight();
+              position[2] = position[2] + 1;
+            }
+            if (!isForwardVisited()) {
+                moveForward();
+                forward_update();
+                pre_turn = 0;
+                back_status = 0;
+                cout<< " ,new_Forward";
+                return;
+            } else if(!isRightVisited()) {
+                turnRight();
+                position[2] = position[2] + 1;
+                pre_turn = 1;
+                back_status = 0;
+                cout << " ,new_Right";
+                return;
+            } else if(!isLeftVisited()) {
+                turnLeft();
+                position[2] = position[2] - 1;
+                pre_turn = 1;
+                back_status = 0;
+                cout<< " ,new_Left";
+                return;
+            }
+        }
 
-
-
+    }
 
     // Single cases:  ------------------------------------------------------------------------------------
     if ((isWallRight() == true) and (isWallLeft() == true) and (isWallForward() == false)) {
         moves.push_back('F');
         moveForward();
-        cout<<"Forward";
+        pre_turn = 0;
+        cout<<", SingleForward";
         forward_update();
         return;
 
@@ -110,15 +229,17 @@ void microMouseServer::studentAI()
 
     }
     else if ((isWallRight() == false) and (isWallLeft() == true) and (isWallForward() == true)) {
-        cout<<"Right";
+        cout<<" ,Single Right";
         turnRight();
+        pre_turn = 1;
         position[2] = position[2] + 1;
         moves.push_back('R');
         return;
     }
     else if ((isWallRight() == true) and (isWallLeft() == false) and (isWallForward() == true)) {
         turnLeft();
-        cout<<"Left";
+        cout<<" ,Single Left";
+        pre_turn = 1;
         position[2] = position[2] - 1;
         moves.push_back('L');
         return;
@@ -129,10 +250,10 @@ void microMouseServer::studentAI()
 
 
     //Destination checks ------------------------------------------------------------------------------------------------------------------------------
-    else if ((!isWallForward() && !isWallLeft() && isWallRight()) || (!isWallForward() && !isWallRight() && isWallLeft())) {
-        cout << "Dest check";
+    else if (((!isWallForward() && !isWallLeft() && isWallRight()) || (!isWallForward() && !isWallRight() && isWallLeft())) && back_status == 0) {
+        cout << ", Dest_check ";
         if (isDestination()) {
-            cout<<"Dest";
+            cout<<", Dest ";
             foundFinish();
             return;
         }
@@ -143,17 +264,24 @@ void microMouseServer::studentAI()
                      || (isWallForward() && !isWallRight() && !isWallLeft())
                      || (!isWallForward() && isWallRight() && !isWallLeft()))
             {
-                vector<int> temp = {position[0], position[1], position[2]};
-                pnode.push_back(temp);
+                if (pre_turn == 0 && back_status == 0) {
+                    vector<int> temp = {position[0], position[1], position[2]};
+                    pnode.push_back(temp);
+                    cout << " ,pnode added ";
+                }
+
             }
-            cout<< "pnode";
             if (!isWallForward()) {
                 moveForward();
+                pre_turn = 0;
                 forward_update();
+                cout <<" ,Forward/Dest";
             }
             else {
                 turnRight();
+                pre_turn = 1;
                 position[2] = position[2] + 1;
+                cout<< " ,Right/Dest";
             }
             return;
         }
@@ -161,22 +289,57 @@ void microMouseServer::studentAI()
 
     //Dead end checks ------------------------------------------------------------------------------------------------------------------------------
     else if ((isWallRight() == true) and (isWallLeft() == true) and (isWallForward() == true)) {
-        cout<<"Visited" << endl;
+        cout<<">Visited" << endl;
         print_vector(visited);
-        cout<<"Pnodes"<<endl;
+        cout<<">Pnodes"<<endl;
         print_vector(pnode);
-        foundFinish();
-        return;
+        back_status = 1;
         turnBackward();
         position[2] = position[2] + 2;
         forward_update();
+    }
 
 
 
 
-       //printUI("Reverse:");
-        reverse(moves.begin(), moves.end());
-        for (const char i : moves) {
+
+    // Other situations: ------------------------------------------------------------------------------------------------------------------------------
+    else {
+        //Parent node cases:
+        if ((!isWallForward() && !isWallLeft() && isWallRight())
+                 || (!isWallForward() && !isWallRight() && isWallLeft())
+                 || (isWallForward() && !isWallRight() && !isWallLeft())
+                 || (!isWallForward() && isWallRight() && !isWallLeft()))
+        {
+            if (pre_turn == 0 && back_status == 0) {
+                vector<int> temp = {position[0], position[1], position[2]};
+                pnode.push_back(temp);
+                cout << " pnode added ";
+            }
+
+        }
+        if (!isWallForward()) {
+            moveForward();
+            pre_turn = 0;
+            forward_update();
+        }
+        else {
+            turnRight();
+            pre_turn = 1;
+            position[2] = position[2] + 1;
+        }
+        return;
+    }
+
+}
+
+
+
+/*
+ * Other code:
+ *        //printUI("Reverse:");
+       reverse(moves.begin(), moves.end());
+       for (const char i : moves) {
 
             if(i == 'F') {
                 moveForward();
@@ -192,41 +355,18 @@ void microMouseServer::studentAI()
                 position[2] = position[2] + 1;
             }
           }
+
         cout<<"Not sup";
         turnBackward();
         position[2] = position[2] + 2;
         forward_update();
         return;
-    }
-
-
-
-
-
-    // Other situations: ------------------------------------------------------------------------------------------------------------------------------
-    else {
-        //Parent node cases:
-        if ((!isWallForward() && !isWallLeft() && isWallRight())
-                 || (!isWallForward() && !isWallRight() && isWallLeft())
-                 || (isWallForward() && !isWallRight() && !isWallLeft())
-                 || (!isWallForward() && isWallRight() && !isWallLeft()))
-        {
-            vector<int> temp = {position[0], position[1], position[2]};
-            pnode.push_back(temp);
-        }
-        cout<< "pnode";
-        if (!isWallForward()) {
-            moveForward();
-            forward_update();
-        }
-        else {
-            turnRight();
-            position[2] = position[2] + 1;
-        }
-        return;
-    }
-
-}
-
-
-
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+*/
