@@ -252,7 +252,8 @@ void microMouseServer::studentAI()
         vector<int> last_pnode_loc = {last_pnode[0], last_pnode[1]};
         if (location == last_pnode_loc) {
             cout<<" ,last PPnode found";
-            int x = abs(((last_pnode[2] % 4) - (position[2] % 4 )) % 4);
+            int x = ((last_pnode[2] % 4) - (position[2] % 4 )) % 4;
+            cout << "signed x"<< x;
             if (x < 0) {
                 x = abs(x);
                 cout << " >x: "<< x << ", ";
@@ -341,6 +342,7 @@ void microMouseServer::studentAI()
     else if (((!isWallForward() && !isWallLeft() && isWallRight()) || (!isWallForward() && !isWallRight() && isWallLeft())) && back_status == 0) {
         cout << ", Dest_check ";
         if (isDestination()) {
+            printUI("GODDAMIT i finally got it!");
             cout<<", Dest ";
             foundFinish();
             return;
@@ -350,7 +352,9 @@ void microMouseServer::studentAI()
             if ((!isWallForward() && !isWallLeft() && isWallRight())
                      || (!isWallForward() && !isWallRight() && isWallLeft())
                      || (isWallForward() && !isWallRight() && !isWallLeft())
-                     || (!isWallForward() && isWallRight() && !isWallLeft()))
+                     || (!isWallForward() && isWallRight() && !isWallLeft())
+                    || (!isWallForward() && isWallRight() && !isWallLeft())
+                    )
             {
                 if (pre_turn == 0 && back_status == 0) {
                     vector<int> temp = {position[0], position[1], position[2]};
@@ -399,7 +403,9 @@ void microMouseServer::studentAI()
         if ((!isWallForward() && !isWallLeft() && isWallRight())
                  || (!isWallForward() && !isWallRight() && isWallLeft())
                  || (isWallForward() && !isWallRight() && !isWallLeft())
-                 || (!isWallForward() && isWallRight() && !isWallLeft()))
+                 || (!isWallForward() && isWallRight() && !isWallLeft())
+                || (!isWallForward() && !isWallRight() && !isWallLeft())
+                )
         {
             if (pre_turn == 0 && back_status == 0) {
                 vector<int> temp = {position[0], position[1], position[2]};
