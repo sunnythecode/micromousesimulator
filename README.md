@@ -1,6 +1,10 @@
 Part2 Final Algorithm:
 By: Sandeep Bajamahal
 
+
+Note: Two functions: isDestination and turnBackwards are defined in micromouseserver.cpp as part of the microMouseServer class. 
+
+
 Prioritize going Forward(), then right, then left
 
 Decision making Process:
