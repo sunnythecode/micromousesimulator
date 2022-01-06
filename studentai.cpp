@@ -29,7 +29,7 @@ int pre_turn = 0; // whether previous move was a turn(for pnode marking)
 // Useful Functions:------------------------------------------------------------------------------------------------------------------------------
 
 void forward_update() {
-    cout << "update";
+    cout << "-F.update-";
     if  ( (position[2] % 4) == 0) { // forward
         position[1] = position[1] + 1;
 
@@ -75,12 +75,16 @@ bool isForwardVisited() {
     }
     cout << "[ "<< temp_loc[0] << ", "<< temp_loc[1] << "]";
     if ((count(visited.begin(), visited.end(), temp_loc))) {
+        temp_loc.erase(temp_loc.begin(),temp_loc.end());
+        cout << " ,FA"<< sizeof(temp_loc);
         return true;
     }
     else {
+        temp_loc.erase(temp_loc.begin(),temp_loc.end());
+        cout << " ,FB:"<< sizeof(temp_loc);
         return false;
     }
-    temp_loc.erase(temp_loc.begin(),temp_loc.end());
+
 }
 bool isRightVisited() {
     if  ( abs(position[2] % 4) == 0) { // forward
@@ -101,12 +105,15 @@ bool isRightVisited() {
 
     }
     if ((count(visited.begin(), visited.end(), temp_loc))) {
+        temp_loc.erase(temp_loc.begin(),temp_loc.end());
+        cout << " ,RA:"<< sizeof(temp_loc);
         return true;
     }
     else {
+        temp_loc.erase(temp_loc.begin(),temp_loc.end());
+        cout << " ,RB:"<< sizeof(temp_loc);
         return false;
     }
-    temp_loc.erase (temp_loc.begin(),temp_loc.end());
 }
 bool isLeftVisited() {
     if  ( abs(position[2] % 4) == 0) { // forward
@@ -127,12 +134,15 @@ bool isLeftVisited() {
 
     }
     if ((count(visited.begin(), visited.end(), temp_loc))) {
+        temp_loc.erase(temp_loc.begin(),temp_loc.end());
+        cout << " ,LA:"<< sizeof(temp_loc);
         return true;
     }
     else {
+        temp_loc.erase(temp_loc.begin(),temp_loc.end());
+        cout << " ,LB:"<< sizeof(temp_loc);
         return false;
     }
-    temp_loc.erase (temp_loc.begin(),temp_loc.end());
 }
 
 // Functions defined in micromouseserver.cpp by me are:
@@ -190,27 +200,36 @@ void microMouseServer::studentAI()
               turnRight();
               position[2] = position[2] + 1;
             }
-            if (!isForwardVisited()) {
+            if (!isForwardVisited() && !isWallForward()) {
                 moveForward();
                 forward_update();
                 pre_turn = 0;
                 back_status = 0;
                 cout<< " ,new_Forward";
                 return;
-            } else if(!isRightVisited()) {
+            } else if(!isRightVisited() && !isWallRight()) {
                 turnRight();
                 position[2] = position[2] + 1;
                 pre_turn = 1;
                 back_status = 0;
                 cout << " ,new_Right";
                 return;
-            } else if(!isLeftVisited()) {
+            } else if(!isLeftVisited() && !isWallLeft()) {
                 turnLeft();
                 position[2] = position[2] - 1;
                 pre_turn = 1;
                 back_status = 0;
                 cout<< " ,new_Left";
                 return;
+            } else {
+                back_status = 1;
+                turnBackward();
+                position[2] = position[2] + 2;
+                forward_update();
+                pre_turn = 1;
+                cout<<" ,searching for prev node.";
+                return;
+
             }
         }
 
@@ -289,8 +308,8 @@ void microMouseServer::studentAI()
 
     //Dead end checks ------------------------------------------------------------------------------------------------------------------------------
     else if ((isWallRight() == true) and (isWallLeft() == true) and (isWallForward() == true)) {
-        cout<<">Visited" << endl;
-        print_vector(visited);
+        //cout<<">Visited" << endl;
+        //print_vector(visited);
         cout<<">Pnodes"<<endl;
         print_vector(pnode);
         back_status = 1;
