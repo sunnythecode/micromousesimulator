@@ -71,10 +71,12 @@ Backtrace(if b.t. = 2)
 
 1 option:
 FRL - save to visited, begin backtracing
+
 2 option:
 FR - perform destination check, save to Pnode(if pre-turn = 0), save to visited
 FL - perform destination check, save to Pnode(if pre-turn = 0), save to visited
 RL - save to Pnode, save to visited
+
 1 option:
 F - update position, move F if not visited else backtrace & turn back
 R - update position, turn R if not visited else backtrace & turn back
