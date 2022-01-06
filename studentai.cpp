@@ -194,11 +194,78 @@ void microMouseServer::studentAI()
         vector<int> last_pnode_loc = {last_pnode[0], last_pnode[1]};
         if (location == last_pnode_loc) {
             cout<<" ,last Pnode found";
+            int x = ((last_pnode[2] % 4) - (position[2] % 4 )) % 4;
+            if (x < 0) {
+                x = abs(x);
+                cout << " >x: "<< x << ", ";
+                for (int i = 0; i < x; i++) {
+                  turnLeft();
+                  position[2] = position[2] - 1;
+                }
+            } else {
+                cout << " >x: "<< x << ", ";
+                for (int i = 0; i < x; i++) {
+                  turnRight();
+                  position[2] = position[2] + 1;
+                }
+            }
+
+            if (!isForwardVisited() && !isWallForward()) {
+                moveForward();
+                forward_update();
+                pre_turn = 0;
+                back_status = 0;
+                cout<< " ,new_Forward";
+                return;
+            } else if(!isRightVisited() && !isWallRight()) {
+                turnRight();
+                position[2] = position[2] + 1;
+                pre_turn = 1;
+                back_status = 0;
+                cout << " ,new_Right";
+                return;
+            } else if(!isLeftVisited() && !isWallLeft()) {
+                turnLeft();
+                position[2] = position[2] - 1;
+                pre_turn = 1;
+                back_status = 0;
+                cout<< " ,new_Left";
+                return;
+            } else {
+                back_status = 2;
+                turnBackward();
+                position[2] = position[2] + 2;
+                forward_update();
+                pnode.pop_back();
+                pre_turn = 1; //Error with traversing from pnode to older pnode
+                cout<<" ,searching for prev node.";
+                return;
+
+            }
+        }
+
+    }
+    if (back_status == 2) {
+        cout<< ">Back2oldnodes, ";
+        int n = pnode.size();
+        vector<int> last_pnode = pnode[n-1];
+        vector<int> last_pnode_loc = {last_pnode[0], last_pnode[1]};
+        if (location == last_pnode_loc) {
+            cout<<" ,last PPnode found";
             int x = abs(((last_pnode[2] % 4) - (position[2] % 4 )) % 4);
-            cout << x;
-            for (int i = 0; i < x; i++) {
-              turnRight();
-              position[2] = position[2] + 1;
+            if (x < 0) {
+                x = abs(x);
+                cout << " >x: "<< x << ", ";
+                for (int i = 0; i < x; i++) {
+                  turnLeft();
+                  position[2] = position[2] - 1;
+                }
+            } else {
+                cout << " >x: "<< x << ", ";
+                for (int i = 0; i < x; i++) {
+                  turnRight();
+                  position[2] = position[2] + 1;
+                }
             }
             if (!isForwardVisited() && !isWallForward()) {
                 moveForward();
@@ -222,11 +289,12 @@ void microMouseServer::studentAI()
                 cout<< " ,new_Left";
                 return;
             } else {
-                back_status = 1;
+                back_status = 2;
                 turnBackward();
                 position[2] = position[2] + 2;
                 forward_update();
-                pre_turn = 1;
+                pnode.pop_back();
+                pre_turn = 1; //Error with traversing from pnode to older pnode
                 cout<<" ,searching for prev node.";
                 return;
 
@@ -235,8 +303,9 @@ void microMouseServer::studentAI()
 
     }
 
+
     // Single cases:  ------------------------------------------------------------------------------------
-    if ((isWallRight() == true) and (isWallLeft() == true) and (isWallForward() == false)) {
+    if (((isWallRight() == true) and (isWallLeft() == true) and (isWallForward() == false)) && back_status == 0 && !isForwardVisited()) {
         moves.push_back('F');
         moveForward();
         pre_turn = 0;
@@ -247,7 +316,7 @@ void microMouseServer::studentAI()
 
 
     }
-    else if ((isWallRight() == false) and (isWallLeft() == true) and (isWallForward() == true)) {
+    else if (((isWallRight() == false) and (isWallLeft() == true) and (isWallForward() == true))) {
         cout<<" ,Single Right";
         turnRight();
         pre_turn = 1;
@@ -307,7 +376,9 @@ void microMouseServer::studentAI()
     }
 
     //Dead end checks ------------------------------------------------------------------------------------------------------------------------------
-    else if ((isWallRight() == true) and (isWallLeft() == true) and (isWallForward() == true)) {
+    else if (((isWallRight() || (!isWallRight() && isRightVisited() && back_status == 0))
+              and (isWallLeft() || (!isWallLeft() && isLeftVisited() && back_status == 0))
+              and (isWallForward() || (!isWallForward() && isForwardVisited() && back_status == 0)))) {
         //cout<<">Visited" << endl;
         //print_vector(visited);
         cout<<">Pnodes"<<endl;
